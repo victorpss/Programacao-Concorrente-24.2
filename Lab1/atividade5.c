@@ -26,9 +26,12 @@ int* iniciarVetor (int* vetor, int nelementos){
 }
 
 int checarVetor (int* vetor, int tamanho){
+
+    printf("\n-----CHECANDO VETOR-----\n\n");
   
     // espero que todos os elementos do vetor tenham valor 1
     for(int i = 0; i < tamanho; i++){
+        printf("[%d] - %d\n", i, vetor[i]);
         if(vetor[i] != 1){
             return 0; // fracasso
         }
@@ -130,10 +133,10 @@ int main(int argc, char* argv[]) {
   printf("--Thread principal terminou\n\n");
 
   if(checarVetor(vetor, nelementos)){
-    printf("Vetor checado com sucesso. Valores corretos.");
+    printf("\nVetor checado com sucesso. Valores corretos.");
     return 0;
   }
 
-  printf("Vetor retornado com valores incorretos.");
+  printf("\nVetor retornado com valores incorretos.");
   return 1;
 }
