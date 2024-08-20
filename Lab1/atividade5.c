@@ -19,19 +19,19 @@ int* iniciarVetor (int* vetor, int nelementos){
     //iniciando todos os elementos do vetor com 0
     for(int i = 0; i<nelementos; i++){  
         vetor[i] = 0;
-        printf("[%d] - %d\n", i, vetor[i]);
     }
+
+    printf("-----VETOR INICIALIZADO-----\n");
 
     return vetor;
 }
 
 int checarVetor (int* vetor, int tamanho){
 
-    printf("\n-----CHECANDO VETOR-----\n\n");
+    printf("\n-----CHECANDO VETOR-----\n");
   
     // espero que todos os elementos do vetor tenham valor 1
     for(int i = 0; i < tamanho; i++){
-        printf("[%d] - %d\n", i, vetor[i]);
         if(vetor[i] != 1){
             return 0; // fracasso
         }
@@ -42,9 +42,6 @@ int checarVetor (int* vetor, int tamanho){
 //funcao executada pelas threads
 void *AdicionarUm (void *arg) {
   t_Args *args = (t_Args *) arg;
-
-  // valor antigo: valor novo:
-  printf("\nA thread %d somou 1 a %d elemento(s).\n\n", args->idThread, args->qtdeElementosAPreencher);
 
   for(int i = 0; i < args->qtdeElementosAPreencher; i++){
     args->vetor[args->qtdeElementosJaPreenchidos + i] += 1;
@@ -71,17 +68,26 @@ int main(int argc, char* argv[]) {
   mthreads = atoi(argv[1]);
   nelementos = atoi(argv[2]);
 
+  if(mthreads < 0 || nelementos < 0){
+      printf("--ERRO: encontrado número negativo.\n");
+      return 1;
+  }
+  else if(mthreads == 0){
+      printf("--ERRO: não foram criadas threads para somar ao vetor.\n");
+      return 1;
+  }
+
   int* vetor = (int *) malloc(nelementos * sizeof(int));
 
   if(vetor == NULL){
       printf("--ERRO: malloc() do vetor\n"); 
-      return 1;
+      return 2;
   }
 
   vetor = iniciarVetor(vetor, nelementos);
 
-  printf("\nTotal de elementos: %d\n", nelementos);
-  printf("Total de threads: %d\n\n", mthreads);
+  printf("\nTotal de threads: %d\n", mthreads);
+  printf("Total de elementos: %d\n\n", nelementos);
 
   //aqui ja sei mais ou menos a quantos elementos cada thread vai adicionar 1
   int min = floor(nelementos/mthreads); // mínimo de elementos a receberem 1 por cada thread
@@ -89,8 +95,10 @@ int main(int argc, char* argv[]) {
 
   // inicialmente, distribuimos [min] elementos para cada thread, porém, ainda pode sobrar elementos (resto) pois a divisão de elementos por thread pode não ser inteira,
   // então tenho que ver quantas threads vão ter que receber um elemento a mais para realizar a soma, chamarei elas de 'sobrecarregadas', enquanto isso chamarei de 'carregadas' a qtde de threads que vão adicionar 1 a [min] elementos
-  int sobrecarregadas = nelementos % mthreads; // qtde daqueles que vão adicionar 1 a [min+1] elementos
+  int sobrecarregadas = nelementos % mthreads; // qtde daqueles que vão adicionar 1 a [min+1] elementos. Se sobrecarregadas == 0, então quer dizer que consegui distribuir igualmente a quantidade de elementos para cada thread.
   int carregadas = mthreads - sobrecarregadas;
+
+  printf("\n%d thread(s) irá(ão) somar 1 a %d elemento(s)\n%d thread(s) irá(ão) somar 1 a %d elemento(s).\n\n", carregadas, min, sobrecarregadas, max);
 
   int preenchidos = 0; // variável auxiliar para manter a quantidade de elementos preenchidos atualizada
 
@@ -99,11 +107,12 @@ int main(int argc, char* argv[]) {
 
   //cria as threads
   for(int i=0; i<mthreads; i++) {
-    printf("--Aloca e preenche argumentos para thread %d\n", i);
+    //comentado para evitar muitos prints quando há muitas threads.
+    //printf("--Aloca e preenche argumentos para thread %d\n", i);
     args = malloc(sizeof(t_Args));
     if (args == NULL) {
       printf("--ERRO: malloc()\n"); 
-      return 1;
+      return 2;
     }
 
     args->idThread = i; 
@@ -111,11 +120,12 @@ int main(int argc, char* argv[]) {
     args->qtdeElementosAPreencher = (i+1 <= carregadas) ? min : max;
     args->vetor = vetor;
 
-    printf("--Cria a thread %d\n", i);
+    //comentado para evitar muitos prints quando há muitas threads.
+    //printf("--Cria a thread %d\n", i);
 
     if (pthread_create(&tid_sistema[i], NULL, AdicionarUm, (void*) args)) {
       printf("--ERRO: pthread_create()\n"); 
-      return 2;
+      return 3;
     }
 
     preenchidos += args->qtdeElementosAPreencher; // atualizando a variável auxiliar após realizar a soma
@@ -125,7 +135,7 @@ int main(int argc, char* argv[]) {
   for (int i=0; i<mthreads; i++) {
     if (pthread_join(tid_sistema[i], NULL)) {
          printf("--ERRO: pthread_join() da thread %d\n", i); 
-         return 3;
+         return 4;
     } 
   }
 
