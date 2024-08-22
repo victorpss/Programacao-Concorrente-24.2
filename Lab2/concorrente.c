@@ -32,7 +32,7 @@ void* produtoInternoConcorrente(void* arg){
     for(int i = 0; i < args.qtdeElementosATratar; i++){
         resultadoParcial += args.vetor1[args.qtdeElementosJaTratados + i] * args.vetor2[args.qtdeElementosJaTratados + i];
         //na linha abaixo dá pra ter uma ideia das threads multiplicando os elementos e acumulando os resultados das operações 
-        printf("Thread %d, elemento %d -> %lf\n", args.idThread, args.qtdeElementosJaTratados + i, resultadoParcial);
+        //printf("Thread %d, elemento %d -> %lf\n", args.idThread, args.qtdeElementosJaTratados + i, resultadoParcial);
     }
 
     ret = malloc(sizeof(t_Ret));
