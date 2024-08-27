@@ -64,6 +64,9 @@ int main(int argc, char*argv[]) {
     //imprimir na saida padrao o vetor gerado
     #ifdef TEXTO
     fprintf(stdout, "Dimensão dos vetores: %ld\n\n", dim);
+
+    // se quiser ver os elementos dos vetores, descomente o bloco abaixo;
+    /*
     fprintf(stdout, "Vetor 1:\n");
     for(long int i=0; i<dim; i++) {
         fprintf(stdout, "%f ",vetor1[i]);
@@ -74,6 +77,7 @@ int main(int argc, char*argv[]) {
         fprintf(stdout, "%f ",vetor2[i]);
     }
     fprintf(stdout, "\n\n");
+    */
     #endif
 
     arquivo = fopen("vetores", "wb");
