@@ -19,14 +19,14 @@ typedef struct {
 } t_Args;
 
 typedef struct {
-   double res;
+   double res; // alternar entre float e double para ver o erro
 } t_Ret;
 
 
 void* produtoInternoConcorrente(void* arg){
     t_Ret *ret; //estrutura de retorno
 
-    double resultadoParcial = 0;
+    double resultadoParcial = 0; // alternar entre float e double para ver o erro
     t_Args args = *(t_Args*) arg;
 
     for(int i = 0; i < args.qtdeElementosATratar; i++){
@@ -54,8 +54,8 @@ int main(int argc, char*argv[]) {
     long int nthreads; // quantidade de threads
     long int dim; // dimensão dos vetores
 
-    double resultadoConcorrente; // resultado do produto interno concorrente
-    double resultadoSequencial; // resultado do produto interno sequencial
+    double resultadoConcorrente; // resultado do produto interno concorrente, alternar entre float e double para ver o erro
+    double resultadoSequencial; // resultado do produto interno sequencial, alternar entre float e double para ver o erro
 
     float *vetor1, *vetor2; // vetores que farão parte do produto interno
 
@@ -115,7 +115,7 @@ int main(int argc, char*argv[]) {
     }
 
     //pegando o resultado do produto interno sequencial
-    ret = fread(&resultadoSequencial, sizeof(double), 1, arquivo);
+    ret = fread(&resultadoSequencial, sizeof(double), 1, arquivo); // alternar entre float e double para ver o erro
 
     tid_sistema = (pthread_t *) malloc(sizeof(pthread_t) * nthreads);
 
@@ -163,7 +163,7 @@ int main(int argc, char*argv[]) {
    }
 
     double variacaoRelativa = abs((resultadoSequencial - resultadoConcorrente)/resultadoSequencial);
-    printf("Resultado do produto interno concorrente: %.26lf\nResultado do produto interno sequencial: %.26lf\nVariação relativa: %.26lf\n\n", resultadoConcorrente, resultadoSequencial, variacaoRelativa);
+    printf("Resultado do produto interno concorrente: %.26lf\nResultado do produto interno sequencial: %.26lf\nVariação relativa: %.26lf\n\n", resultadoConcorrente, resultadoSequencial, variacaoRelativa); // alternar entre %f (float) e %lf (double) para ver o erro
 
     //log da função main
     printf("--Thread principal terminou\n");

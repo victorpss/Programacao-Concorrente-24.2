@@ -31,7 +31,7 @@ float* geraVetor(int dim){
 }
 
 double produtoInternoSequencial(float* vetor1, float* vetor2, int dim){
-    double resultado = 0;
+    double resultado = 0; // alternar entre float e double para ver o erro
 
     for(int i=0; i<dim; i++){
         resultado += vetor1[i] * vetor2[i];
@@ -43,7 +43,7 @@ double produtoInternoSequencial(float* vetor1, float* vetor2, int dim){
 int main(int argc, char*argv[]) {
     float *vetor1, *vetor2; // vetores que farão parte do produto interno
     long int dim; // dimensao dos vetores
-    double resultado=0; //resultado do produto interno
+    double resultado=0; //resultado do produto interno, alternar entre float e double para ver o erro
     FILE *arquivo; //descritor do arquivo de saida
     size_t ret; //retorno da funcao de escrita no arquivo de saida
 
@@ -94,17 +94,11 @@ int main(int argc, char*argv[]) {
     //calculo do produto interno de forma sequencial
     resultado = produtoInternoSequencial(vetor1, vetor2, dim);
     fprintf(stdout, "Produto interno sequencial: %lf ", resultado);
-    ret = fwrite(&resultado, sizeof(double), 1, arquivo);
+    ret = fwrite(&resultado, sizeof(double), 1, arquivo); // alternar entre float e double para ver o erro
 
-    //escreve o vetor no arquivo
-    //abre o arquivo para escrita binaria
-    //descritorArquivo2 = escreverArquivo(vetor2, dim, "arq2");
-    //escreve o somatorio
-    //ret = fwrite(&soma, sizeof(double), 1, descritorArquivo);
 
-    //finaliza o uso das variaveis
+    //fecha arquivo e libera ponteiros
     fclose(arquivo);
-    //fclose(descritorArquivo2);
     free(vetor1);
     free(vetor2);
     return 0;
