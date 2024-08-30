@@ -8,11 +8,8 @@
 #include<stdlib.h>
 #include<time.h>
 
-//descomentar o define abaixo caso deseje imprimir uma versao truncada da matriz gerada no formato texto
-#define TEXTO 
-
 int main(int argc, char*argv[]) {
-   float *matriz1, *matriz2; //matriz que será gerada
+   float *matriz1; //matriz que será gerada
    int n, m; //dimensoes da matriz
    long long int tam; //qtde de elementos na matriz
    FILE * descritorArquivo; //descritor do arquivo de saida
@@ -41,28 +38,6 @@ int main(int argc, char*argv[]) {
        *(matriz1+i) = (rand() % 1000) * 0.3;
    }
 
-   //imprimir na saida padrao a matriz gerada
-   #ifdef TEXTO
-   for(int i=0; i<n; i++) {
-      for(int j=0; j<m; j++)
-        fprintf(stdout, "%.6f ", matriz1[i*m+j]);
-      fprintf(stdout, "\n");
-   }
-   #endif
-
-   //aloca memoria para a segunda matriz
-   matriz2 = (float*) malloc(sizeof(float) * tam);
-   if(!matriz2) {
-      fprintf(stderr, "Erro de alocao da memoria da matriz 2\n");
-      return 2;
-   }
-
-   //preenche a segunda matriz com valores float aleatorios
-   //randomiza a sequencia de numeros aleatorios
-   for(long int i=0; i<tam; i++) {
-       *(matriz2+i) = (rand() % 1000) * 0.3;
-   }
-
    //escreve a matriz no arquivo
    //abre o arquivo para escrita binaria
    descritorArquivo = fopen(argv[3], "wb");
@@ -79,27 +54,9 @@ int main(int argc, char*argv[]) {
       fprintf(stderr, "Erro de escrita no arquivo\n");
       return 4;
    }
-   //escreve os elementos da segunda matriz
-   ret = fwrite(matriz2, sizeof(float), tam, descritorArquivo);
-   if(ret < tam) {
-      fprintf(stderr, "Erro de escrita no arquivo\n");
-      return 4;
-   }
-
-   //obs: a qtde de colunas da primeira matriz deve ser igual à quantidade de linhas da segunda matriz.
-   #ifdef TEXTO
-   fprintf(stdout, "\n");
-   for(int i=0; i<m; i++) {
-      for(int j=0; j<n; j++)
-        fprintf(stdout, "%.6f ", matriz2[i*n+j]);
-      fprintf(stdout, "\n");
-   }
-   #endif
 
    //finaliza o uso das variaveis
    fclose(descritorArquivo);
    free(matriz1);
-   free(matriz2);
    return 0;
 }
-

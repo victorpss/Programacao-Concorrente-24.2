@@ -1,26 +1,19 @@
-/* Programa que le um arquivo binario com dois valores inteiros (indicando as dimensoes de uma matriz) 
- * e uma sequencia com os valores da matriz (em float)
- * Entrada: nome do arquivo de entrada
- * Saida: valores da matriz escritos no formato texto (com 6 casas decimais) na saida padrao 
- * */
+#include <stdio.h>
+#include <stdlib.h>
+#include "timer.h"
 
-#include<stdio.h>
-#include<stdlib.h>
-
-
-float* multiplicacaoSequencial(float *m1, float *m2, int linhas, int colunas){
-    int tam = linhas * colunas;
-    float *res = malloc(sizeof(float) * tam); // m1: n x m; m2: m x n; dimensao resultante: n x n
+float* multiplicacaoSequencial(float *m1, float *m2, int linhas1, int colunas1, int linhas2, int colunas2){
+    int tam = linhas1 * colunas2;
+    float *res = malloc(sizeof(float) * tam); // m1: l1 x c1; m2: l2 x c2; dimensao resultante: l1 x c2
     float soma;
     int aux = 0; //para ajudar a escrever o elemento no vetor res
 
-    for(int i = 0; i < linhas; i++){
-        for(int j = 0; j < linhas; j++){
+    for(int i = 0; i < linhas1; i++){
+        for(int j = 0; j < colunas2; j++){
             soma = 0;
 
-            for(int k = 0; k < colunas; k++){
-                soma += m1[i*colunas + k] * m2[k*linhas + j];
-                //printf("\nm1 = %f, m2 = %f\n", m1[i*colunas + k], m2[k*linhas + j]);
+            for(int k = 0; k < colunas1; k++){
+                soma += m1[i*colunas1 + k] * m2[k*colunas2 + j];
             }
 
             *(res+aux) = soma;
@@ -36,91 +29,119 @@ int main(int argc, char*argv[]) {
    //matriz 1: n x m
    //matriz 2: m x n
    //resultado: n x n
-   int n, m; //dimensoes da matriz
+   int linhas1, colunas1, linhas2, colunas2; //dimensoes das matrizes
    long long int tam; //qtde de elementos na matriz
-   FILE *arquivoEntrada, *arquivoSaida; //descritores do arquivo de entrada e de saida
+   FILE *arquivoEntrada1, *arquivoEntrada2, *arquivoSaida; //descritores do arquivo de entrada e de saida
    size_t ret; //retorno da funcao de leitura no arquivo de entrada
+   double inicio, fim, delta;
+
+   GET_TIME(inicio);
    
    //recebe os argumentos de entrada
-   if(argc < 3) {
-      fprintf(stderr, "Digite: %s <arquivo entrada> <arquivo saida>\n", argv[0]);
+   if(argc < 4) {
+      fprintf(stderr, "Digite: %s <arquivo entrada 1> <arquivo entrada 2> <arquivo saida>\n", argv[0]);
       return 1;
    }
    
-   
-   //abre o arquivo para leitura binaria
-   arquivoEntrada = fopen(argv[1], "rb");
-   if(!arquivoEntrada) {
-      fprintf(stderr, "Erro de abertura do arquivo\n");
+   //abre o arquivo para leitura binaria da primeira matriz
+   arquivoEntrada1 = fopen(argv[1], "rb");
+   if(!arquivoEntrada1) {
+      fprintf(stderr, "Erro de abertura do arquivo da primeira matriz de entrada\n");
       return 2;
    }
 
    //le as dimensoes da matriz
-   ret = fread(&n, sizeof(int), 1, arquivoEntrada);
+   ret = fread(&linhas1, sizeof(int), 1, arquivoEntrada1);
    if(!ret) {
-      fprintf(stderr, "Erro de leitura das dimensoes da matriz arquivo \n");
+      fprintf(stderr, "Erro de leitura das dimensoes da matriz de entrada 1 \n");
       return 3;
    }
-   ret = fread(&m, sizeof(int), 1, arquivoEntrada);
+   ret = fread(&colunas1, sizeof(int), 1, arquivoEntrada1);
    if(!ret) {
-      fprintf(stderr, "Erro de leitura das dimensoes da matriz arquivo \n");
+      fprintf(stderr, "Erro de leitura das dimensoes da matriz de entrada 1 \n");
       return 3;
    }
-   tam = n * m; //calcula a qtde de elementos da matriz
+
+   //abre o arquivo para leitura binaria da segunda matriz
+   arquivoEntrada2 = fopen(argv[2], "rb");
+   if(!arquivoEntrada2) {
+      fprintf(stderr, "Erro de abertura do arquivo da segunda matriz de entrada\n");
+      return 2;
+   }
+
+   //le as dimensoes da matriz
+   ret = fread(&linhas2, sizeof(int), 1, arquivoEntrada2);
+   if(!ret) {
+      fprintf(stderr, "Erro de leitura das dimensoes da matriz de entrada 2 \n");
+      return 3;
+   }
+   ret = fread(&colunas2, sizeof(int), 1, arquivoEntrada2);
+   if(!ret) {
+      fprintf(stderr, "Erro de leitura das dimensoes da matriz de entrada 2 \n");
+      return 3;
+   }
+
+   if(colunas1 != linhas2){
+      fprintf(stderr, "A dimensão das matrizes de entrada impedem a realização da multiplicação.\nA quantidade de colunas da primeira matriz deve ser igual à quantidade de linhas da segunda matriz. \n");
+      return 5;
+   }
+
+   tam = linhas1 * colunas2; //calcula a qtde de elementos da matriz resultante
 
    //aloca memoria para a matriz 1
-   matriz1 = (float*) malloc(sizeof(float) * tam);
+   matriz1 = (float*) malloc(sizeof(float) * linhas1*colunas1);
    if(!matriz1) {
       fprintf(stderr, "Erro de alocao da memoria da matriz 1\n");
       return 3;
    }
 
    //carrega a matriz de elementos do tipo float do arquivo
-   ret = fread(matriz1, sizeof(float), tam, arquivoEntrada);
-   if(ret < tam) {
+   ret = fread(matriz1, sizeof(float), linhas1*colunas1, arquivoEntrada1);
+   if(ret < linhas1*colunas1) {
       fprintf(stderr, "Erro de leitura dos elementos da matriz 1\n");
       return 4;
    }
 
    //aloca memoria para a matriz 2
-   matriz2 = (float*) malloc(sizeof(float) * tam);
+   matriz2 = (float*) malloc(sizeof(float) * linhas2*colunas2);
    if(!matriz2) {
       fprintf(stderr, "Erro de alocao da memoria da matriz 2\n");
       return 3;
    }
 
    //carrega a matriz de elementos do tipo float do arquivo
-   ret = fread(matriz2, sizeof(float), tam, arquivoEntrada);
-   if(ret < tam) {
+   ret = fread(matriz2, sizeof(float), linhas2*colunas2, arquivoEntrada2);
+   if(ret < linhas2*colunas2) {
       fprintf(stderr, "Erro de leitura dos elementos da matriz 2\n");
       return 4;
    }
 
-   /*imprime a matriz na saida padrao
-   for(int i=0; i<n; i++) { 
-      for(int j=0; j<m; j++)
-        fprintf(stdout, "%.6f ", matriz1[i*m+j]);
-      fprintf(stdout, "\n");
-   }*/
+   GET_TIME(fim);
 
-    resultado = multiplicacaoSequencial(matriz1, matriz2, n, m);
+   delta = fim - inicio;
 
-  //imprime a matriz na saida padrao
-   for(int i=0; i<n; i++) { 
-      for(int j=0; j<n; j++)
-        fprintf(stdout, "%.6f ", resultado[i*n+j]);
-      fprintf(stdout, "\n");
-   }
+   printf("----MULTIPLICAÇÃO SEQUENCIAL----\n\n");
+   printf("Tempo para inicialização: %.30lf\n", delta);
 
+   GET_TIME(inicio);
+   resultado = multiplicacaoSequencial(matriz1, matriz2, linhas1, colunas1, linhas2, colunas2);
+   GET_TIME(fim);
+
+   delta = fim - inicio;
+
+   printf("Tempo para processamento: %.30lf\n", delta);
+
+   GET_TIME(inicio);
    //abre o arquivo para escrita binaria
-   arquivoSaida = fopen(argv[2], "wb");
+   arquivoSaida = fopen(argv[3], "wb");
    if(!arquivoSaida) {
       fprintf(stderr, "Erro de abertura do arquivo\n");
       return 2;
    }
-   //escreve numero de n e de m
-   //ret = fwrite(&n, sizeof(int), 1, arquivoSaida);
-   //ret = fwrite(&m, sizeof(int), 1, arquivoSaida);
+
+   //escreve numero de linhas e de colunas da matriz resultante
+   ret = fwrite(&linhas1, sizeof(int), 1, arquivoSaida);
+   ret = fwrite(&colunas2, sizeof(int), 1, arquivoSaida);
    //escreve os elementos da matriz resultante
    ret = fwrite(resultado, sizeof(float), tam, arquivoSaida);
    if(ret < tam) {
@@ -129,10 +150,16 @@ int main(int argc, char*argv[]) {
    }
 
    //finaliza o uso das variaveis
-   fclose(arquivoEntrada);
+   fclose(arquivoEntrada1);
+   fclose(arquivoEntrada2);
    fclose(arquivoSaida);
    free(matriz1);
    free(matriz2);
+
+   GET_TIME(fim);
+
+   delta = fim - inicio;
+   printf("Tempo para finalização: %.30lf\n", delta);
+
    return 0;
 }
-
