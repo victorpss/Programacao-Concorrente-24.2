@@ -26,9 +26,9 @@ float* multiplicacaoSequencial(float *m1, float *m2, int linhas1, int colunas1, 
 
 int main(int argc, char*argv[]) {
    float *matriz1, *matriz2, *resultado; //matrizes que serão carregadas do arquivo de entrada
-   //matriz 1: n x m
-   //matriz 2: m x n
-   //resultado: n x n
+   //matriz 1: n1 x m1
+   //matriz 2: n2 x m2
+   //resultado: n1 x m2
    int linhas1, colunas1, linhas2, colunas2; //dimensoes das matrizes
    long long int tam; //qtde de elementos na matriz
    FILE *arquivoEntrada1, *arquivoEntrada2, *arquivoSaida; //descritores do arquivo de entrada e de saida
