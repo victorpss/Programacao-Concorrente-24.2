@@ -16,4 +16,4 @@
 >
 >7 - Visualize o terminal e perceba os valores da variável 'soma' impressos.
 >
->8(opcional) - Comente/descomente a linha 6 ```#define THREADS``` para mostrar/esconder o log das threads (ordem de execução e terminação).
+>8 (opcional) - Comente/descomente a linha 6 ```#define THREADS``` para mostrar/esconder o log das threads (ordem de execução e terminação).
