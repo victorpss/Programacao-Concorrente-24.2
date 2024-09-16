@@ -2,6 +2,9 @@
 #include <stdlib.h>
 #include <pthread.h>
 
+//comente a linha abaixo para esconder a ordem de execução e terminação das threads, descomente para visualizá-las
+#define THREADS
+
 long int soma = 0; //variavel compartilhada entre as threads
 int contador = 0; //variavel para contar a qtde de multiplos de 10 impresso
 pthread_mutex_t mutex; //variavel de lock para exclusao mutua
@@ -12,7 +15,9 @@ pthread_cond_t cond_extra; //condicional para a thread extra de print
 void *ExecutaTarefa (void *arg) {
     long int id = (long int) arg;
  
+    #ifdef THREADS
     printf("Thread : %ld esta executando...\n", id);
+    #endif
 
     for (int i=0; i<10000; i++) {
         //--entrada na SC
@@ -26,13 +31,20 @@ void *ExecutaTarefa (void *arg) {
         //--saida da SC
         pthread_mutex_unlock(&mutex);
     }
+
+  #ifdef THREADS
   printf("Thread : %ld terminou!\n", id);
+  #endif
+
   pthread_exit(NULL);
 }
 
 //função da thread de print da soma
 void *extra (void *args) {
+  #ifdef THREADS
   printf("Extra : esta executando...\n");
+  #endif
+  printf("\n");
  
   for(int i=0; i<10000 && contador < 20; i++){
     pthread_mutex_lock(&mutex); // entrada na seção crítica
@@ -49,7 +61,11 @@ void *extra (void *args) {
     pthread_mutex_unlock(&mutex); // saída da seção crítica
   }
     pthread_cond_broadcast(&cond_soma); // para garantir que nenhuma thread ficará bloqueada
-    printf("Extra : terminou!\n");
+
+    #ifdef THREADS
+    printf("\nExtra : terminou!\n");
+    #endif
+
     pthread_exit(NULL);
 }
 
@@ -98,7 +114,7 @@ int main(int argc, char *argv[]) {
    pthread_cond_destroy(&cond_soma);
    pthread_cond_destroy(&cond_extra);
    
-   printf("Valor de 'soma' = %ld\n", soma);
+   printf("\nValor de 'soma' = %ld\n", soma);
 
    return 0;
 }
