@@ -25,6 +25,8 @@
 
 <br></br>
 **Recorte das execuções:**
+
+![Print do terminal](terminal.png)
 - Em 1, a thread 15 entra para iniciar uma escrita.
 - Em 2 e 3, as threads 18 e 19 tentam iniciar leitura, mas como a 15 está escrevendo, elas entram na fila de leitura e serão desbloqueadas quando não tiver ninguém escrevendo ou na fila de escrita.
 - Em 4, a thread 0 termina a leitura que começou antes do início da escrita da thread 15.
