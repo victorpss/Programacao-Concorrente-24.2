@@ -46,7 +46,7 @@ void EntraEscrita(long int id){
       querendoEscrever++;
       pthread_cond_wait(&condEscrita, &mutex);
    }
-   escrevendo++;
+   escrevendo = 1;
    long int idAtual = id; // refazendo a atribuição ao id pois, sem ela, a variável id estava referenciando o id que liberou a fila de escrita anteriormente porque foi o último lugar que teve a atribuição ao id, então o print da linha de baixo ia com o id errado.
    printf("T[%ld] Indo escrever agora\n", idAtual);
    pthread_mutex_unlock(&mutex);
@@ -54,7 +54,7 @@ void EntraEscrita(long int id){
 
 void SaiEscrita(long int id){
    pthread_mutex_lock(&mutex);
-   escrevendo--;
+   escrevendo = 0;
    if(querendoEscrever){
       printf("T[%ld] Escrita finalizada. Liberando o próximo para escrita\n", id);
       querendoEscrever--;
