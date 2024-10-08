@@ -45,7 +45,7 @@ void SaiLeitura(long int id){
 void EntraEscrita(long int id){
    pthread_mutex_lock(&mutex);
    while(leitores || escrevendo){ 
-      printf("T[%ld] Entrou na fila para escrever\n", id);
+      printf("T[%ld] Entrou na fila para escrever pois tem alguém lendo ou já escrevendo\n", id);
       querendoEscrever++;
       pthread_cond_wait(&condEscrita, &mutex);
    }
