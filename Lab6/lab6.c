@@ -44,11 +44,12 @@ void SaiLeitura(long int id){
 
 void EntraEscrita(long int id){
    pthread_mutex_lock(&mutex);
+   querendoEscrever++;
    while(leitores || escrevendo){ 
       printf("T[%ld] Entrou na fila para escrever pois tem alguém lendo ou já escrevendo\n", id);
-      querendoEscrever++;
       pthread_cond_wait(&condEscrita, &mutex);
    }
+   querendoEscrever--;
    escrevendo = 1;
    printf("T[%ld] Indo escrever agora\n", id);
    pthread_mutex_unlock(&mutex);
@@ -59,7 +60,6 @@ void SaiEscrita(long int id){
    escrevendo = 0;
    if(querendoEscrever){
       printf("T[%ld] Escrita finalizada. Liberando o próximo para escrita\n", id);
-      querendoEscrever--;
       pthread_cond_signal(&condEscrita); // libero a escrita para o proximo da fila APENAS. Não faz sentido liberar todos visto que só ocorre 1 leitura por vez.
    }
    else{
