@@ -18,10 +18,10 @@
 
 <br></br>
 **Análise:** O programa escrito deverá respeitar a prioridade das operações de escrita, isto é, sempre que existir thread realizando escrita ou thread(s) na fila para escrita, novas operações de leitura não podem começar. Para isso, algumas condições são verificadas para garantir tal objetivo:
-- Para iniciar uma escrita, deverá ser verificado se alguma thread está realizando a escrita ou se a fila já está formada. Caso positivo, essa thread é bloqueada com o comando ```pthread_cond_wait``` e entra na fila de escrita. Caso contrário, ela pode iniciar a escrita.
+- Para iniciar uma escrita, deverá ser verificado se alguma thread está realizando a escrita ou a leitura. Caso positivo, essa thread é bloqueada com o comando ```pthread_cond_wait``` e entra na fila de escrita. Caso contrário, ela pode iniciar a escrita.
 - Para iniciar uma leitura, deverá ser verificado se alguma thread está realizando a escrita ou se existem threads na fila para escrever, pois a prioridade é delas. Caso positivo, a thread é bloqueada com o comando ```pthread_cond_wait``` e entra na fila para leitura (e só lê após o esgotamento da fila de escrita). Caso contrário, ela pode iniciar a leitura.
 - Para finalizar uma escrita, deverá ser verificado se tem alguém na fila de escrita. Caso positivo, através do comando ```pthread_cond_signal```, a próxima thread na fila será liberada para realizar escrita. Caso contrário, posso liberar a leitura para todas as threads na fila de leitura com o comando ```pthread_cond_broadcast```.
-- Para finalizar uma leitura, não existe nenhuma verificação, basta terminar.
+- Para finalizar uma leitura, verifica-se o novo número de leitores. Se for 0, libera uma thread na fila de escrita com o comando ```pthread_cond_signal```.
 
 <br></br>
 **Recorte das execuções:**
