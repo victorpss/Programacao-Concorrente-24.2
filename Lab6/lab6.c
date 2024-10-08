@@ -36,19 +36,21 @@ void SaiLeitura(long int id){
    pthread_mutex_lock(&mutex);
    printf("T[%ld] Finalizando leitura\n", id);
    leitores--;
+   if(!leitores){
+      pthread_cond_signal(&condEscrita); 
+   }
    pthread_mutex_unlock(&mutex);
 }
 
 void EntraEscrita(long int id){
    pthread_mutex_lock(&mutex);
-   if(escrevendo || querendoEscrever){ // também vejo se alguém está querendo escrever para evitar que furem fila, pois, sem essa verificação, uma thread poderia chegar logo após outra thread terminar a escrita e liberar a fila (ela veria que não tem ninguém escrevendo e ia escrever sem ter entrado na fila antes)
+   while(leitores || escrevendo){ 
       printf("T[%ld] Entrou na fila para escrever\n", id);
       querendoEscrever++;
       pthread_cond_wait(&condEscrita, &mutex);
    }
    escrevendo = 1;
-   long int idAtual = id; // refazendo a atribuição ao id pois, sem ela, a variável id estava referenciando o id que liberou a fila de escrita anteriormente porque foi o último lugar que teve a atribuição ao id, então o print da linha de baixo ia com o id errado.
-   printf("T[%ld] Indo escrever agora\n", idAtual);
+   printf("T[%ld] Indo escrever agora\n", id);
    pthread_mutex_unlock(&mutex);
 }
 
