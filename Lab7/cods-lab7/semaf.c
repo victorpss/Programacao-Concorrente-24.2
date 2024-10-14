@@ -4,22 +4,28 @@
 #include <semaphore.h>
 
 #define NTHREADS 3
-#define TAM 10 // tamanho de N
+// descomente/comente a linha abaixo para ativar/desativar o log do buffer1 e perceba que a quantidade de caracteres respeita o tamanho do buffer passado na linha de comando
+//#define LOG 
+
 
 // Variaveis globais
 sem_t sem1, sem2, sem3;      // semaforos para coordenar a ordem de execucao das threads
-char buffer1[TAM+1]; // a cada leitura com o fgets, eu leio TAM+1 elementos (o último é sempre '\0')
-char buffer2[4*TAM]; // buffer com espaço suficiente para armazenar o buffer1 modificado
-int contador = 0; //conta caracteres já inseridos no buffer2
+char *buffer1; // buffer para armazenar alguns caracteres do arquivo de entrada
+char buffer2[9999]; // buffer com espaço suficiente para armazenar o buffer1 modificado
+int contador = 0; // conta caracteres já inseridos no buffer2
 int fim_arquivo = 0; // flag para indicar o fim do arquivo
+int n = 0; // n do enunciado
+int tam; // tamanho do buffer1
 
 //lendo N caracteres e carregando no buffer1
 void *t1 (void *arg) {
     FILE *entrada = (FILE*) arg;
 
-    while(fgets(buffer1, TAM+1, entrada) != NULL){
-        // li TAM caracteres na condicao e botei no buffer1
-        printf("buf1: %s\n", buffer1);
+    while(fgets(buffer1, tam+1, entrada) != NULL){
+        // li tam caracteres na condicao e botei no buffer1
+        #ifdef LOG
+            printf("buf1: %s\n", buffer1);
+        #endif
 
         // liberar t2
         sem_post(&sem2);
@@ -27,7 +33,7 @@ void *t1 (void *arg) {
         sem_wait(&sem1);
     }
 
-    // quando terminar de ler o arquivo todo, insiro um nulo para indicar fim do buffer e libero a t3 de escrever no arquivo
+    // quando terminar de ler o arquivo todo, libero a t3 de escrever no arquivo de saida
     fclose(entrada);
     fim_arquivo = 1;
     sem_post(&sem2); // liberar t2 para saber que terminou
@@ -37,36 +43,32 @@ void *t1 (void *arg) {
 }
 
 //ler o buffer1 e passar pro buffer2 de forma modificada
-void *t2 (void *arg) {
-    int i = 0;
-    int n = 0; // conta quantos '\n' já foram adicionados mas se limita a 10 devido ao enunciado
-    int index = 0;
-    int prox = 2*n+1; // prox indica o char que irei ler e adicionar um '\n' em seguida
+void *t2(void *arg) {
+    int index = 0; // índice local para inserir no buffer2
+    int prox = 2 * n + 1; // próxima posição para adicionar '\n'
 
-    while(1) {
-        // bloquear t2 se buffer1 não está pronto para ser lido
-        char atual;
-        sem_wait(&sem2);
+    while (1) {
+        sem_wait(&sem2); // esperar buffer1 pronto
 
-        if (fim_arquivo) break; // se o arquivo terminou, saímos do loop
+        if (fim_arquivo) break;
 
-        for(i = 0; i < TAM; i++){ //rodando por todos os caracteres de buffer1 (i pode servir como contador de caracteres lidos)
-            atual = buffer1[i];
+        for (int i = 0; i < tam; i++) {
+            char atual = buffer1[i];
 
-            if(index == prox){
-                buffer2[i] = '\n'; //adiciona o \n ao lugar apropriado
+            if (index == prox) {
+                buffer2[contador++] = '\n';
                 index = 0;
-                prox = (n < 10) ? (2*(++n)+1) : i + 10;
-                contador++;
+
+                // prox = quantos índices depois devo adicionar após o índice do último \n
+                prox = (n < 10) ? 2 * (++n) + 1 : 10;
             }
 
-            buffer2[contador+i+n] = atual;
+            // inserindo o caractere atual no buffer2
+            buffer2[contador++] = atual;
             index++;
         }
 
-        printf("buf2: %s\n", buffer2);
-        contador += i+n;
-        sem_post(&sem1); // devolvo para t1 ler mais um pacote de caracteres
+        sem_post(&sem1); // liberar t1 para ler mais caracteres
     }
 
     pthread_exit(NULL);
@@ -97,18 +99,27 @@ int main(int argc, char *argv[]) {
     pthread_t tid[NTHREADS];
     FILE *entrada;
 
-    if(argc<1) {
-        printf("Digite: %s <arquivo de entrada>\n", argv[0]);
+    if(argc<3) {
+        printf("Digite: %s <tamanho do buffer1> <arquivo de entrada>\n", argv[0]);
         return 1;
     }
 
-    entrada = fopen("entrada.txt", "r");
+    tam = atoi(argv[1]);
+
+    // alocando memória para o buffer1
+    buffer1 = (char*) malloc((tam + 1) * sizeof(char));
+    if (!buffer1) {
+        fprintf(stderr, "Erro ao alocar memória para buffer1\n");
+        return 3;
+    }
+
+    entrada = fopen(argv[2], "r");
     if (!entrada) {
         fprintf(stderr, "Erro de abertura do arquivo de entrada\n");
         return 2;
     }
 
-    //inicia os semaforos
+    //inicia os semaforos, todos com sinal = 0
     sem_init(&sem1, 0, 0);
     sem_init(&sem2, 0, 0);
     sem_init(&sem3, 0, 0);
