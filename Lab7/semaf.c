@@ -84,13 +84,12 @@ void *t3 (void *arg) {
         pthread_exit(NULL);
     }
 
-    for (int i = 0; i < contador; i++) {
-        printf("%c", buffer2[i]); // imprime no console
-        fwrite(&buffer2[i], sizeof(char), 1, saida); // escreve no arquivo
-    }
+    buffer2[contador] = '\0'; // terminando a string corretamente
+
+    printf("%s\n", buffer2);
+    fwrite(buffer2, sizeof(char), contador, saida); // escrevendo no arquivo
 
     fclose(saida);
-
     pthread_exit(NULL);
 }
 
