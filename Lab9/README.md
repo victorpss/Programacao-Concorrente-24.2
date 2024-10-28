@@ -19,7 +19,7 @@
 
 # Atividade 5
 
-**OBJETIVO DO EXERCÍCIO:** Usar os recursos de concorrencia de Go, com comunicação e sincronização via canais, para resolver o problema de encontrar numeros primos em uma lista de entrada
+**OBJETIVO DO EXERCÍCIO:** Usar os recursos de concorrência de Go, com comunicação e sincronização via canais, para resolver o problema de encontrar numeros primos em uma lista de entrada
 
 **INSTRUÇÕES PARA RODAR O CÓDIGO (Preferencialmente ambiente Linux):**
 
